@@ -4,6 +4,7 @@ import fontys.util.NumberDoesntExistException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import testutil.CommonTestUtil;
 
 /**
  * @author Oscar de Leeuw
@@ -14,14 +15,6 @@ public class IBankTest {
     private String naam2 = "Piet";
     private String plaats1 = "Aardappel";
     private String plaats2 = "Frikandel";
-
-    private Money maakMoney() {
-        return new Money(100, "€");
-    }
-
-    private Money maakMoney(long amount) {
-        return new Money(amount, "€");
-    }
 
     private int openRekeningSameKlant(int amount) {
         int ret = 0;
@@ -45,7 +38,7 @@ public class IBankTest {
 
     @Before
     public void setUp() throws Exception {
-        bank = new Bank("TOPKEK");
+        bank = BankTestUtil.maakBankDefault();
     }
 
     @Test
@@ -93,7 +86,7 @@ public class IBankTest {
     public void maakOver_WithDifferentAccounts_ReturnsTrue() throws Exception {
         openRekeningDifferentKlant(2);
 
-        boolean result = bank.maakOver(100000000, 100000001, maakMoney());
+        boolean result = bank.maakOver(100000000, 100000001, CommonTestUtil.maakMoneyDefault());
 
         Assert.assertTrue(result);
     }
@@ -102,35 +95,35 @@ public class IBankTest {
     public void maakOver_WithWrongDestAccountNumber_ExpectsException() throws Exception {
         openRekeningDifferentKlant(2);
 
-        bank.maakOver(100000000, 1214, maakMoney());
+        bank.maakOver(100000000, 1214, CommonTestUtil.maakMoneyDefault());
     }
 
     @Test(expected = NumberDoesntExistException.class)
     public void maakOver_WithWrongSourceAccountNumber_ExpectsException() throws Exception {
         openRekeningDifferentKlant(2);
 
-        bank.maakOver(124, 100000000, maakMoney());
+        bank.maakOver(124, 100000000, CommonTestUtil.maakMoneyDefault());
     }
 
     @Test(expected = RuntimeException.class)
     public void maakOver_WithOwnAccountNumber_ExpectsException() throws Exception {
         openRekeningDifferentKlant(2);
 
-        bank.maakOver(1, 1, maakMoney());
+        bank.maakOver(1, 1, CommonTestUtil.maakMoneyDefault());
     }
 
     @Test(expected = RuntimeException.class)
     public void maakOver_WithNegativeMoney_ExpectsException() throws Exception {
         openRekeningDifferentKlant(2);
 
-        bank.maakOver(100000000, 100000001, maakMoney(-500));
+        bank.maakOver(100000000, 100000001, CommonTestUtil.maakMoneyWithAmount(-500));
     }
 
     @Test
     public void maakOver_WithOverdrawing_ReturnsFalse() throws Exception {
         openRekeningDifferentKlant(2);
 
-        boolean result = bank.maakOver(100000000, 100000001, maakMoney(99999));
+        boolean result = bank.maakOver(100000000, 100000001, CommonTestUtil.maakMoneyWithAmount(99999));
 
         Assert.assertFalse(result);
     }
@@ -139,7 +132,7 @@ public class IBankTest {
     public void maakOver_WithOverdrawingSourceAccount_ReturnsZero() throws Exception {
         openRekeningDifferentKlant(2);
 
-        bank.maakOver(100000000, 100000001, maakMoney(99999));
+        bank.maakOver(100000000, 100000001, CommonTestUtil.maakMoneyWithAmount(99999));
 
         IRekening rekening = bank.getRekening(100000000);
         long actual = rekening.getSaldo().getCents();
@@ -151,7 +144,7 @@ public class IBankTest {
     public void maakOver_WithOverdrawingDestAccount_ReturnsZero() throws Exception {
         openRekeningDifferentKlant(2);
 
-        bank.maakOver(100000000, 100000001, maakMoney(99999));
+        bank.maakOver(100000000, 100000001, CommonTestUtil.maakMoneyWithAmount(99999));
 
         IRekening rekening = bank.getRekening(100000001);
         long actual = rekening.getSaldo().getCents();
