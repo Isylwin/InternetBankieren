@@ -9,19 +9,24 @@ import bank.bankieren.Money;
 
 import fontys.util.InvalidSessionException;
 import fontys.util.NumberDoesntExistException;
+import fontyspublisher.IRemotePublisherForDomain;
+import fontyspublisher.RemotePublisher;
 
-public class Bankiersessie extends UnicastRemoteObject implements
-		IBankiersessie {
+public class Bankiersessie implements IBankiersessie {
 
 	private static final long serialVersionUID = 1L;
 	private long laatsteAanroep;
 	private int reknr;
 	private IBank bank;
+	private IRemotePublisherForDomain publisher;
 
-	public Bankiersessie(int reknr, IBank bank) throws RemoteException {
+	public Bankiersessie(int reknr, IBank bank, IRemotePublisherForDomain publisher) throws RemoteException {
 		laatsteAanroep = System.currentTimeMillis();
 		this.reknr = reknr;
 		this.bank = bank;
+		this.publisher = publisher;
+
+		publisher.registerProperty(reknr + "");
 	}
 
 	public boolean isGeldig() {
@@ -41,7 +46,20 @@ public class Bankiersessie extends UnicastRemoteObject implements
 		if (!bedrag.isPositive())
 			throw new RuntimeException("amount must be positive");
 		
-		return bank.maakOver(reknr, bestemming, bedrag);
+		boolean result = bank.maakOver(reknr, bestemming, bedrag);
+
+		if(!result) {
+			return false;
+		}
+
+		try {
+			publisher.inform(reknr + "", null, getRekening());
+			publisher.inform(bestemming + "", null,  bank.getRekening(bestemming));
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+		}
+
+		return true;
 	}
 
 	private void updateLaatsteAanroep() throws InvalidSessionException {
@@ -63,7 +81,8 @@ public class Bankiersessie extends UnicastRemoteObject implements
 
 	@Override
 	public void logUit() throws RemoteException {
-		UnicastRemoteObject.unexportObject(this, true);
+		publisher.unregisterProperty(reknr + "");
+		//UnicastRemoteObject.unexportObject(this, true);
 	}
 
 }

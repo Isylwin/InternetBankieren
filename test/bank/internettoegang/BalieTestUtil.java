@@ -1,6 +1,7 @@
 package bank.internettoegang;
 
 import bank.bankieren.IBank;
+import fontyspublisher.RemotePublisher;
 import testutil.CommonTestUtil;
 
 import java.rmi.RemoteException;
@@ -15,7 +16,7 @@ public class BalieTestUtil {
     }
 
     public static IBalie maakBalieDefault() throws RemoteException {
-        return new Balie(maakBankDefault());
+        return new Balie(maakBankDefault(), new RemotePublisher());
     }
 
     public static IBankiersessie maakBankierSessieDefault() throws RemoteException

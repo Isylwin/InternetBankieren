@@ -16,6 +16,8 @@ import java.rmi.Naming;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import fontyspublisher.RemotePublisher;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -61,13 +63,17 @@ public class BalieServer extends Application {
                 int port = 1099;
                 Properties props = new Properties();
                 String rmiBalie = address + ":" + port + "/" + nameBank;
+                String publisherString =  address + ":" + port + "/publisher";
                 props.setProperty("balie", rmiBalie);
+                props.setProperty("publisher", publisherString);
                 out = new FileOutputStream(nameBank + ".props");
                 props.store(out, null);
                 out.close();
                 java.rmi.registry.LocateRegistry.createRegistry(port);
-                IBalie balie = new Balie(new Bank(nameBank));
+                RemotePublisher publisher = new RemotePublisher();
+                IBalie balie = new Balie(new Bank(nameBank), publisher);
                 Naming.rebind(nameBank, balie);
+                Naming.rebind("publisher", publisher);
                
                 return true;
 

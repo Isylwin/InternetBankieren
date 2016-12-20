@@ -4,6 +4,7 @@ import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import bank.bankieren.*;
+import fontyspublisher.IRemotePublisherForDomain;
 
 public class Balie extends UnicastRemoteObject implements IBalie {
 
@@ -12,10 +13,12 @@ public class Balie extends UnicastRemoteObject implements IBalie {
 	private HashMap<String, ILoginAccount> loginaccounts;
 	//private Collection<IBankiersessie> sessions;
 	private java.util.Random random;
+	private IRemotePublisherForDomain publisher;
 
-	public Balie(IBank bank) throws RemoteException {
+	public Balie(IBank bank, IRemotePublisherForDomain publisher) throws RemoteException {
 		this.bank = bank;
 		loginaccounts = new HashMap<>();
+		this.publisher = publisher;
 		//sessions = new HashSet<IBankiersessie>();
 		random = new Random();
 	}
@@ -47,7 +50,7 @@ public class Balie extends UnicastRemoteObject implements IBalie {
 		ILoginAccount loginaccount = loginaccounts.get(accountnaam);
 
 		if (loginaccount != null && loginaccount.checkWachtwoord(wachtwoord)) {
-			return new Bankiersessie(loginaccount.getReknr(), bank);
+			return new Bankiersessie(loginaccount.getReknr(), bank, publisher);
 		}
 		else return null;
 	}

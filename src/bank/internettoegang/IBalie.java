@@ -1,5 +1,6 @@
 package bank.internettoegang;
 
+import java.io.Serializable;
 import java.rmi.*;
 
 

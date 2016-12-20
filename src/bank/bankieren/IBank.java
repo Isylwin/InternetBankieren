@@ -2,11 +2,13 @@ package bank.bankieren;
 
 import fontys.util.*;
 
+import java.io.Serializable;
+
 /**
  * @author 871059
  * 
  */
-public interface IBank {
+public interface IBank extends Serializable {
 
     /**
      * creatie van een nieuwe bankrekening met een identificerend rekeningnummer; 
